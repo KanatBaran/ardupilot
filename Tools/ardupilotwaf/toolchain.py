@@ -24,6 +24,25 @@ from waflib import Logs
 import os
 import re
 import sys
+import builtins
+
+# Older Waf versions use the POSIX-specific /dev/null path while probing
+# compilers. Redirect it to Python's platform-specific null device during
+# native Windows compiler detection.
+def _load_native_windows_compilers(cfg):
+    original_open = builtins.open
+
+    def windows_open(file, *args, **kwargs):
+        if file == '/dev/null':
+            file = os.devnull
+        return original_open(file, *args, **kwargs)
+
+    builtins.open = windows_open
+    try:
+        cfg.load('compiler_cxx compiler_c gccdeps')
+    finally:
+        # Always restore the original built-in, even if compiler detection fails.
+        builtins.open = original_open
 
 @conf
 def find_gxx(conf):
@@ -139,7 +158,10 @@ def configure(cfg):
         return
 
     if cfg.env.TOOLCHAIN == 'native':
-        cfg.load('compiler_cxx compiler_c gccdeps')
+        if sys.platform == 'win32':
+            _load_native_windows_compilers(cfg)
+        else:
+            cfg.load('compiler_cxx compiler_c gccdeps')
 
         return
 
