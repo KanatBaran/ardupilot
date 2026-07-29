@@ -23,13 +23,16 @@ def relpath(bld, node):
 def build(bld):
     binding_cc = BINDING_CC
     binding_cflags = BINDING_CFLAGS
+    # Windows needs a .exe suffix; cmd will not run an extensionless PE
+    gen_bindings_name = 'gen-bindings.exe' if bld.env.DEST_OS == 'win32' else 'gen-bindings'
+    gen_bindings_cmd = r'.\gen-bindings.exe' if bld.env.DEST_OS == 'win32' else './gen-bindings'
 
     if bld.env.DEST_OS == 'win32':
         binding_cc = '"%s"' % bld.env.CC[0]
         binding_cflags += " -Wno-error=deprecated-declarations"
 
     main_c = bld.srcnode.make_node('libraries/AP_Scripting/generator/src/main.c')
-    gen_bindings = bld.bldnode.find_or_declare('gen-bindings')
+    gen_bindings = bld.bldnode.find_or_declare(gen_bindings_name)
 
     main_c_rel = relpath(bld, main_c)
     gen_bindings_rel = relpath(bld, gen_bindings)
@@ -45,7 +48,6 @@ def build(bld):
 
     bindings = bld.srcnode.make_node('libraries/AP_Scripting/generator/description/bindings.desc')
     bindings_rel = relpath(bld, bindings)
-    gen_bindings = bld.bldnode.find_or_declare('gen-bindings')
     generated_cpp = bld.bldnode.find_or_declare('libraries/AP_Scripting/lua_generated_bindings.cpp')
     generated_h = bld.bldnode.find_or_declare('libraries/AP_Scripting/lua_generated_bindings.h')
 
@@ -58,7 +60,7 @@ def build(bld):
     bld(
         # build the bindings
         source=[bindings, gen_bindings],
-        rule="./gen-bindings -o libraries/AP_Scripting/lua_generated_bindings -i %s %s" % (bindings_rel, docs_command),
+        rule="%s -o libraries/AP_Scripting/lua_generated_bindings -i %s %s" % (gen_bindings_cmd, bindings_rel, docs_command),
         target=[generated_cpp, generated_h],
         group='dynamic_sources',
     )
