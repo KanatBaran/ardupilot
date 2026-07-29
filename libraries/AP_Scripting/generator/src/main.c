@@ -4,8 +4,10 @@
 #include <stdarg.h>
 #include <assert.h>
 #include <string.h>
+#ifndef _WIN32
 #include <unistd.h>
 #include <getopt.h>
+#endif
 
 char keyword_alias[]               = "alias";
 char keyword_rename[]              = "rename";
@@ -2888,6 +2890,46 @@ char * docs_path = NULL;
 int main(int argc, char **argv) {
   state.line_num = -1;
 
+#ifdef _WIN32
+  for (int i = 1; i < argc; i++) {
+    if (strcmp(argv[i], "-i") == 0) {
+      if (i + 1 >= argc) {
+        error(ERROR_GENERAL, "Missing value for -i");
+      }
+      if (description != NULL) {
+        error(ERROR_GENERAL, "Already loaded a description file");
+      }
+      i++;
+      trace(TRACE_GENERAL, "Loading a description file: %s", argv[i]);
+      description = fopen(argv[i], "r");
+      if (description == NULL) {
+        error(ERROR_GENERAL, "Unable to load the description file: %s", argv[i]);
+      }
+    } else if (strcmp(argv[i], "-o") == 0) {
+      if (i + 1 >= argc) {
+        error(ERROR_GENERAL, "Missing value for -o");
+      }
+      if (output_path != NULL) {
+        error(ERROR_GENERAL, "An output path was already selected.");
+      }
+      i++;
+      output_path = argv[i];
+      trace(TRACE_GENERAL, "Loading an output path of %s", output_path);
+    } else if (strcmp(argv[i], "-d") == 0) {
+      if (i + 1 >= argc) {
+        error(ERROR_GENERAL, "Missing value for -d");
+      }
+      if (docs_path != NULL) {
+        error(ERROR_GENERAL, "An docs path was already selected.");
+      }
+      i++;
+      docs_path = argv[i];
+      trace(TRACE_GENERAL, "Loading an docs path of %s", docs_path);
+    } else {
+      error(ERROR_GENERAL, "Unknown argument: %s", argv[i]);
+    }
+  }
+#else
   int c;
   while ((c = getopt(argc, argv, "i:o:d:")) != -1) {
     switch (c) {
@@ -2917,6 +2959,7 @@ int main(int argc, char **argv) {
         break;
     }
   }
+#endif
 
   if (output_path == NULL) {
     error(ERROR_GENERAL, "An output path must be provided for the generated bindings");

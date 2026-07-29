@@ -21,6 +21,13 @@ def relpath(bld, node):
     return os.path.relpath(node.abspath(), blddir)
 
 def build(bld):
+    binding_cc = BINDING_CC
+    binding_cflags = BINDING_CFLAGS
+
+    if bld.env.DEST_OS == 'win32':
+        binding_cc = '"%s"' % bld.env.CC[0]
+        binding_cflags += " -Wno-error=deprecated-declarations"
+
     main_c = bld.srcnode.make_node('libraries/AP_Scripting/generator/src/main.c')
     gen_bindings = bld.bldnode.find_or_declare('gen-bindings')
 
@@ -32,7 +39,7 @@ def build(bld):
         source=main_c,
         target=[gen_bindings],
         # we should have configure tests for finding the native compiler
-        rule="%s %s -o %s %s" % (BINDING_CC, BINDING_CFLAGS, gen_bindings_rel, main_c_rel),
+        rule="%s %s -o %s %s" % (binding_cc, binding_cflags, gen_bindings_rel, main_c_rel),
         group='dynamic_sources',
     )
 
