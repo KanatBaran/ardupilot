@@ -790,6 +790,13 @@ class SITLBoard(Board):
 
     def configure_env(self, cfg, env):
         super().configure_env(cfg, env)
+
+        # Native Windows SITL uses the MSVC STL, whose current headers
+        # are not compatible with Clang in C++11 mode.
+        if cfg.env.DEST_OS == 'win32':
+            env.CXXFLAGS.remove('-std=gnu++11')
+            env.CXXFLAGS += ['-std=gnu++14']
+
         env.DEFINES.update(
             CONFIG_HAL_BOARD = 'HAL_BOARD_SITL',
             CONFIG_HAL_BOARD_SUBTYPE = 'HAL_BOARD_SUBTYPE_NONE',
