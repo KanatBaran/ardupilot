@@ -5,7 +5,14 @@
 #include <AP_HAL/AP_HAL_Macros.h>
 #include <AP_HAL/Semaphores.h>
 #include "AP_HAL_SITL_Namespace.h"
+#ifdef _WIN32
+#include <mutex>
+#include <condition_variable>
+#include <thread>
+#include <chrono>
+#else
 #include <pthread.h>
+#endif
 
 class HALSITL::Semaphore : public AP_HAL::Semaphore {
 public:
@@ -18,8 +25,13 @@ public:
     void check_owner() const;  // asserts that current thread owns semaphore
 
 protected:
+#ifdef _WIN32
+    std::recursive_mutex _lock;
+    std::thread::id owner;
+#else
     pthread_mutex_t _lock;
     pthread_t owner;
+#endif
 
     // keep track the recursion level to ensure we only disown the
     // semaphore once we're done with it
@@ -39,6 +51,10 @@ public:
 
 private:
     HALSITL::Semaphore mtx;
+#ifdef _WIN32
+    std::condition_variable_any cond;
+#else
     pthread_cond_t cond;
+#endif
     bool pending;
 };
