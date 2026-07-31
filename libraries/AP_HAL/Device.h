@@ -75,7 +75,7 @@ public:
 
     // return bus type
     enum BusType bus_type(void) const {
-        return _bus_id.devid_s.bus_type;
+        return static_cast<BusType>(_bus_id.devid_s.bus_type);
     }
 
     // return bus number
@@ -369,7 +369,7 @@ protected:
       parameter protocol without loss of information.
      */
     struct DeviceStructure {
-        enum BusType bus_type : 3;
+        unsigned bus_type : 3;
         uint8_t bus: 5;    // which instance of the bus type
         uint8_t address;   // address on the bus (eg. I2C address)
         uint8_t devtype;   // device class specific device type

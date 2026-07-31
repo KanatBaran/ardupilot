@@ -252,7 +252,7 @@ uint32_t AP_HAL::Device::get_bus_id_devtype(uint8_t devtype) const {
 enum AP_HAL::Device::BusType AP_HAL::Device::devid_get_bus_type(uint32_t dev_id) {
     union DeviceId d;
     d.devid = dev_id;
-    return d.devid_s.bus_type;
+    return static_cast<BusType>(d.devid_s.bus_type);
 }
 
 uint8_t AP_HAL::Device::devid_get_bus(uint32_t dev_id) {
