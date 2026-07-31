@@ -131,6 +131,8 @@ def ap_common_checks(cfg):
 
     cfg.check(header_name='byteswap.h', mandatory=False)
 
+    cfg.check(header_name='unistd.h', mandatory=False)
+
     cfg.check(
         compiler='cxx',
         fragment='''

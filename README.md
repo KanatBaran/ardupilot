@@ -1,3 +1,12 @@
+> **Disclaimer — personal fork (`windows-native`)**
+>
+> This repository is **not** [official ArduPilot](https://github.com/ArduPilot/ardupilot). It is a personal, experimental learning project.
+> My goal is to improve my skills in C++, Linux/Windows OS APIs, libraries, and related areas.
+>
+> I cannot guarantee 100% that this project will work on Windows, or on any other platform.
+> I accept no responsibility for any issues that arise from cloning, building, or running this repository.
+> Use entirely at your own risk.
+
 # ArduPilot Project
 
 [![Discord](https://img.shields.io/discord/674039678562861068.svg)](https://ardupilot.org/discord)
